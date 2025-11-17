@@ -1,16 +1,27 @@
 import React from "react";
 import Logo from "../../Componnets/Logo/Logo";
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
+import useAuth from "../../Hooks/useAuth";
 
 const Navbar = () => {
+  const { user, setUser, logout } = useAuth();
   const links = (
     <>
-      <li><NavLink to='/'>Services</NavLink></li>
-      <li><NavLink to='/'>AboutUs</NavLink></li>
-      <li><NavLink to='/Coverage'>Coverage</NavLink></li>
-
+      <li>
+        <NavLink to="/">Services</NavLink>
+      </li>
+      <li>
+        <NavLink to="/">AboutUs</NavLink>
+      </li>
+      <li>
+        <NavLink to="/Coverage">Coverage</NavLink>
+      </li>
     </>
   );
+
+  const logouthandle = () => {
+    logout();
+  };
 
   return (
     <div>
@@ -38,9 +49,7 @@ const Navbar = () => {
               tabIndex="-1"
               className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
             >
-
-
-                {links}
+              {links}
             </ul>
           </div>
           <a className="btn btn-ghost text-xl">
@@ -48,12 +57,26 @@ const Navbar = () => {
           </a>
         </div>
         <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1">
-            {links}
-          </ul>
+          <ul className="menu menu-horizontal px-1">{links}</ul>
         </div>
-        <div className="navbar-end">
-          <a className="btn">Button</a>
+        <div className="navbar-end flex gap-1.5">
+          <div className="">
+            {user ? (
+              <button onClick={logouthandle} className="btn">
+                {" "}
+                logout
+              </button>
+            ) : (
+              <Link to="/login">
+                <button className="btn"> Singin</button>
+              </Link>
+            )}
+          </div>
+          <div>
+            <Link to="/bearider">
+              <button className="btn"> Be a rider</button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
