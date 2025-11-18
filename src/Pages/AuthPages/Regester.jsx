@@ -1,29 +1,66 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import useAuth from "../../Hooks/useAuth";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import Sociallogin from "../SocialLogin/Sociallogin";
+import axios from "axios";
 
 const Regester = () => {
-  const { regesterUser, googlesingin } = useAuth();
+    const location = useLocation();
+    const naviagte = useNavigate();
+  const { regesterUser, googlesingin, updatesProfile } = useAuth();
+  //   const [user, setUser] = useState([]);
+  console.log(location);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
-//   console.log(register)
-
   const handleregestation = (data) => {
+    console.log("after registration:", data.photo[0]);
+
+    const profileImg = data.photo[0];
+
     regesterUser(data.email, data.password)
-      .then((res) => console.log(res.user))
-      .catch((er) => console.log(er));
+      .then((res) => /*  */ {
+        console.log("User created:", res.user);
+         naviagte(location?.state || '/');
+
+        //new from data for img store !
+
+        const fromData = new FormData();
+        fromData.append("image", profileImg);
+
+        const imgUri = `https://api.imgbb.com/1/upload?key=${
+          import.meta.env.VITE_IMAGE_HOST
+        }`;
+        axios
+          .post(imgUri, fromData)
+
+          .then((result) => {
+            console.log(result.data.data.url);
+            // update profile here
+            const updateProfile = {
+              displayName: data.name,
+              photoURL: result.data.data.url,
+            };
+            // update for firebase profile here
+            // console.log(updateProfile);
+
+            updatesProfile(updateProfile)
+              .then(() => console.log("profile updated done!!"))
+              .catch((er) => console.log(er));
+          });
+      })
+      .catch((er) => console.log("Error:", er));
   };
 
   const googlesingins = () => {
     googlesingin()
-      .then((res) => console.log(res.user))
-      .catch((err) => console.log(err));
+      .then((res) => console.log("Google login:", res.user), naviagte(location?.state || '/'))
+      .catch((err) => console.log("Error:", err));
   };
 
   return (
@@ -37,29 +74,25 @@ const Regester = () => {
         <div className="card bg-base-100 w-full mx-auto max-w-sm shrink-0 shadow-2xl">
           <div className="card-body">
             <fieldset className="fieldset">
-              {/* name feild  */}
+              {/* Name */}
               <label className="label">Name</label>
               <input
-                type="name"
+                type="text"
                 {...register("name", { required: true })}
                 className="input"
-                placeholder="name"
+                placeholder="Your Name"
               />
-              {errors.name?.type === "required" && (
-                <p className="text-red-500">name is required</p>
-              )}
+              {errors.name && <p className="text-red-500">Name is required</p>}
 
-              {/* photo feild */}
-              <label className="label">photoURL</label>
+              {/* Photo */}
+              <label className="label">Photo</label>
               <input
                 type="file"
                 {...register("photo", { required: true })}
-                // className="input"
                 className="file-input"
-                placeholder="photo"
               />
-              {errors.name?.type === "required" && (
-                <p className="text-red-500">photo is required</p>
+              {errors.photo && (
+                <p className="text-red-500">Photo is required</p>
               )}
 
               {/* Email */}
@@ -70,7 +103,7 @@ const Regester = () => {
                 className="input"
                 placeholder="Email"
               />
-              {errors.email?.type === "required" && (
+              {errors.email && (
                 <p className="text-red-500">Email is required</p>
               )}
 
@@ -99,20 +132,27 @@ const Regester = () => {
                 </p>
               )}
 
-              <button className="btn btn-neutral mt-4">Register</button>
+              {/* Submit Button */}
+              <button className="btn btn-neutral mt-4" type="submit">
+                Register
+              </button>
 
-              {/* Social Login */}
-              {/* <Sociallogin></Sociallogin> */}
-              <button>
-                <button onClick={googlesingins}>
-                  <Sociallogin></Sociallogin>
-                </button>
+              {/* Google Login */}
+              <button
+                type="button"
+                onClick={googlesingins}
+                className="mt-3 btn btn-outline"
+              >
+                <Sociallogin />
               </button>
             </fieldset>
 
-            <p>
+            <p className="mt-4 text-center">
               Already have an account?{" "}
-              <Link className="text-blue-500" to="/login">
+              
+              <Link 
+             
+              className="text-blue-500" to="/login">
                 Login
               </Link>
             </p>

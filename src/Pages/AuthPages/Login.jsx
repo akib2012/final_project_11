@@ -1,10 +1,12 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import useAuth from "../../Hooks/useAuth";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import Sociallogin from "../SocialLogin/Sociallogin";
 
 const Login = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -14,14 +16,22 @@ const Login = () => {
 
   const hadnlelogin = (data) => {
     singinUser(data.email, data.password)
-      .then((result) => console.log(result.user))
+      .then((result) => {
+        console.log(result.user);
+        navigate(location?.state || '/')
+      })
       .catch((error) => console.log(error));
-    console.log("form data after login", data);
+    
   };
 
   const handlegoogleauth = () => {
     googlesingin()
-    .then(res => console.log(res.user))
+    .then(res => {
+        console.log(res.user)
+         navigate(location?.state || '/' )
+        //  <navigate state={location.pathname}></navigate>
+
+    })
     .catch(error => console.log(error))
   }
   return (
@@ -57,7 +67,7 @@ const Login = () => {
               <button className="btn btn-neutral mt-4">Login</button>
               <button onClick={handlegoogleauth}><Sociallogin></Sociallogin></button>
             </fieldset>
-            <p>New to Zap shiift <Link className="text-blue-500" to='/regester'> regesrer</Link></p>
+            <p>New to Zap shiift <Link state={location.state} className="text-blue-500" to='/regester'> regesrer</Link></p>
           </div>
         </div>
       </form>
